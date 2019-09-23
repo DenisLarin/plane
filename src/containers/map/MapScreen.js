@@ -7,7 +7,7 @@ class MapScreen extends Component {
         var map = new mapboxgl.Map({
             container: this.mapContainer,
             style: 'mapbox://styles/mapbox/streets-v11',
-            // center: [55.753215, 37.622504],
+            center: [37.622504,55.753215],
             zoom: 10
         });
     }
