@@ -4,10 +4,28 @@ import './index.css';
 import Main from "./Main";
 import * as serviceWorker from './serviceWorker';
 import {BrowserRouter} from 'react-router-dom'
+
+//redux
+import {Provider} from 'react-redux';
+import {createStore, applyMiddleware, compose, combineReducers} from 'redux';
+import thunk from 'redux-thunk';
+
+import Map from './store/reducers/map/map'
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+const rootReducer = combineReducers({
+    mapReducer: Map
+});
+const store = createStore(rootReducer, composeEnhancers(applyMiddleware(thunk)));
+
+
 const app = (
-    <BrowserRouter>
-        <Main/>
-    </BrowserRouter>
+    <Provider store={store}>
+        <BrowserRouter>
+            <Main/>
+        </BrowserRouter>
+    </Provider>
 )
 
 

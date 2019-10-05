@@ -1,0 +1,13 @@
+.stationButton{
+  border: none;
+  font: inherit;
+  background-color: #0e0e0e;
+  cursor: pointer;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 7px;
+  transition: all 0.3s;
+  &:hover{
+    color: #ffb043;
+  }
+}
