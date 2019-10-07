@@ -13,6 +13,7 @@ class MapScreen extends Component {
             style: 'mapbox://styles/mapbox/streets-v11',
             center: [56.076361, 56.516010],
             zoom: 5,
+            doubleClickZoom: false
         });
         const kazanPopup = new mapboxgl.Popup({ offset: 25 })
             .setText('Казань');
