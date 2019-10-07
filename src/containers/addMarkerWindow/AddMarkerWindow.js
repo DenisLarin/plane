@@ -18,8 +18,15 @@ class AddMarkerWindow extends Component {
             {name: "new", range: 400, blindSpot: 150, coast: NaN},
         ]
     };
-    addStationButtonClickHandler = (station) => {
 
+    meterToPixel = (meters, latitude, zoomLevel) => {
+        const earthCircumference = 40075017;
+        const latitudeRadians = latitude * (Math.PI / 180);
+        const meterPerPixel = earthCircumference * Math.cos(latitudeRadians) / Math.pow(2, zoomLevel + 8)
+        return meters / meterPerPixel;
+    };
+
+    addStationButtonClickHandler = (station) => {
         const map = this.props.map;
         if (!map) {
             return
@@ -46,7 +53,44 @@ class AddMarkerWindow extends Component {
             "type": "geojson",
             "data": geoJson
         });
-        const layer = map.addLayer({
+
+        //радиус действия зоны
+        const radius = this.meterToPixel(station.range*1000, center.lat, map.getZoom());
+        map.addSource(`${station.name}-rangeZone`, {
+            "type": "geojson",
+            "data": geoJson
+        });
+        map.addLayer({
+            'id': `${station.name}-rangeZoneLayer`,
+            'type': 'circle',
+            'source': `${station.name}-rangeZone`,
+            "paint": {
+                "circle-radius": radius,
+                "circle-color": 'green',
+                "circle-opacity": 0.5,
+            }
+        });
+
+        //радиус мертвой зоны
+        const deadZoneradius = this.meterToPixel(station.blindSpot*1000, center.lat, map.getZoom());
+        map.addSource(`${station.name}-deadZone`, {
+            "type": "geojson",
+            "data": geoJson
+        });
+        map.addLayer({
+            'id': `${station.name}-deadZoneLayer`,
+            'type': 'circle',
+            'source': `${station.name}-deadZone`,
+            "paint": {
+                "circle-radius": deadZoneradius,
+                "circle-color": 'red',
+                "circle-opacity": 0.6,
+            }
+        });
+
+
+        //иконка + текст
+        map.addLayer({
             id: station.name,
             type: "symbol",
             source: `${station.name}-point`,
@@ -59,12 +103,22 @@ class AddMarkerWindow extends Component {
                 "text-size": 15,
                 "text-transform": "uppercase",
                 "text-letter-spacing": 0.05,
-            }
+            },
         });
-        this.props.addStation(station)
+
+        this.props.addStation(station);
+
 
         map.on('click', station.name, e => {
             this.onStationClickHandler(station);
+        });
+        map.on('zoom', e => {
+            if (map.getLayer(`${station.name}-deadZoneLayer`) && map.getLayer(`${station.name}-rangeZoneLayer`)) {
+                const deadZoneradius = this.meterToPixel(station.blindSpot * 1000, center.lat, map.getZoom());
+                map.setPaintProperty(`${station.name}-deadZoneLayer`, "circle-radius", deadZoneradius)
+                const rangeRadius = this.meterToPixel(station.range * 1000, center.lat, map.getZoom());
+                map.setPaintProperty(`${station.name}-rangeZoneLayer`, "circle-radius", rangeRadius)
+            }
         });
         const canvas = map.getCanvasContainer();
         map.on('mouseenter', station.name, function () {
@@ -77,8 +131,10 @@ class AddMarkerWindow extends Component {
         const onMove = e => {
             const coords = e.lngLat;
             canvas.style.cursor = 'grabbing';
-            geoJson.features[0].geometry.coordinates = [coords.lng, coords.lat];
+            geoJson.features[0].geometry.coordinates = [coords.lng, coords.lat]
             map.getSource(`${station.name}-point`).setData(geoJson);
+            map.getSource(`${station.name}-deadZone`).setData(geoJson);
+            map.getSource(`${station.name}-rangeZone`).setData(geoJson);
         };
         const onUp = e => {
             const coords = e.lngLat;
@@ -102,6 +158,11 @@ class AddMarkerWindow extends Component {
         const map = this.props.map;
         map.removeLayer(station.name);
         map.removeSource(`${station.name}-point`);
+        map.removeLayer(`${station.name}-deadZoneLayer`);
+        map.removeLayer(`${station.name}-rangeZoneLayer`);
+        map.removeSource(`${station.name}-deadZone`);
+        map.removeSource(`${station.name}-rangeZone`);
+
         this.props.removeStation(station);
     };
 
