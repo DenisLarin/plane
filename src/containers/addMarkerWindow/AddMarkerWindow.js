@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
-import {addMap, addStation} from './../../store/actions/index'
+import {addStation, removeStation} from './../../store/actions/index'
 import stationIMG from '../../assets/iconfinder_radar_3383443.png'
 import './addMarkerWindow.scss'
 import StationButton from "../../components/StationButton/StationButton";
@@ -52,19 +52,19 @@ class AddMarkerWindow extends Component {
             source: `${station.name}-point`,
             "layout": {
                 "icon-image": "station",
-                "icon-size": 0.2
+                "icon-size": 0.2,
+                "text-field": station.name,
+                "text-offset": [-0.5, 2],
+                "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+                "text-size": 15,
+                "text-transform": "uppercase",
+                "text-letter-spacing": 0.05,
             }
         });
         this.props.addStation(station)
 
         map.on('click', station.name, e => {
-            new mapboxgl.Popup()
-                .setLngLat(e.lngLat)
-                .setHTML(`станция: ${station.name} цена: ${station.coast}`)
-                .addTo(map);
-        });
-        map.on('dblclick', station.name, e => {
-            this.onStationClickHandler(station.name);
+            this.onStationClickHandler(station);
         });
         const canvas = map.getCanvasContainer();
         map.on('mouseenter', station.name, function () {
@@ -91,15 +91,18 @@ class AddMarkerWindow extends Component {
             map.on('mousemove', onMove);
             map.once('mouseup', onUp);
         });
-        map.on('touchstart', 'point', e=> {
+        map.on('touchstart', 'point', e => {
             if (e.points.length !== 1) return;
             e.preventDefault();
             map.on('touchmove', onMove);
             map.once('touchend', onUp);
         });
     };
-    onStationClickHandler = (stationName) => {
-        console.log(stationName);
+    onStationClickHandler = (station) => {
+        const map = this.props.map;
+        map.removeLayer(station.name);
+        map.removeSource(`${station.name}-point`);
+        this.props.removeStation(station);
     };
 
     render() {
@@ -135,7 +138,8 @@ class AddMarkerWindow extends Component {
 
 const mapDispatchToProps = dispatch => {
     return {
-        addStation: (station) => dispatch(addStation(station))
+        addStation: (station) => dispatch(addStation(station)),
+        removeStation: (station) => dispatch(removeStation(station))
     }
 };
 const mapStateToProps = state => {

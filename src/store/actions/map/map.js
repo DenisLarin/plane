@@ -8,14 +8,12 @@ export const addStation = (station)=>{
     }
 };
 export const removeStation = (station)=>{
-
     return{
         type: mapActions.REMOVE_STATION,
         station: station
     }
 };
 export const addMap = (map)=>{
-
     return{
         type: mapActions.SAVE_MAP,
         map: map
