@@ -18,6 +18,107 @@ class AddMarkerWindow extends Component {
             {name: "new", range: 400, blindSpot: 150, coast: NaN},
         ]
     };
+    //добавление мертвой зоны
+    addDeadZone = (map, station, center, geoJson) => {
+        const deadZoneradius = this.meterToPixel(station.blindSpot * 1000, center.lat, map.getZoom());
+        map.addSource(`${station.name}-deadZone`, {
+            "type": "geojson",
+            "data": geoJson
+        });
+        map.addLayer({
+            'id': `${station.name}-deadZoneLayer`,
+            'type': 'circle',
+            'source': `${station.name}-deadZone`,
+            "paint": {
+                "circle-radius": deadZoneradius,
+                "circle-color": 'red',
+                "circle-opacity": 0.6,
+            }
+        });
+    };
+    //добавление активной зоны
+    addRangeZone = (map, station, center, geoJson) => {
+        const radius = this.meterToPixel(station.range * 1000, center.lat, map.getZoom());
+        map.addSource(`${station.name}-rangeZone`, {
+            "type": "geojson",
+            "data": geoJson
+        });
+        map.addLayer({
+            'id': `${station.name}-rangeZoneLayer`,
+            'type': 'circle',
+            'source': `${station.name}-rangeZone`,
+            "paint": {
+                "circle-radius": radius,
+                "circle-color": 'green',
+                "circle-opacity": 0.5,
+            }
+        });
+    };
+    //добавление иконки и надписи
+    addIconWithImage = (map, station) => {
+        map.addLayer({
+            id: station.name,
+            type: "symbol",
+            source: `${station.name}-point`,
+            "layout": {
+                "icon-image": "station",
+                "icon-size": 0.2,
+                "text-field": station.name,
+                "text-offset": [-0.5, 2],
+                "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+                "text-size": 15,
+                "text-transform": "uppercase",
+                "text-letter-spacing": 0.05,
+            },
+        });
+    };
+
+    //слушители карты
+    addEventListeners = (map, station, center, geoJson)=>{
+        map.on('click', station.name, e => {
+            this.onStationClickHandler(station);
+        });
+        map.on('zoom', e => {
+            if (map.getLayer(`${station.name}-deadZoneLayer`) && map.getLayer(`${station.name}-rangeZoneLayer`)) {
+                const deadZoneradius = this.meterToPixel(station.blindSpot * 1000, center.lat, map.getZoom());
+                map.setPaintProperty(`${station.name}-deadZoneLayer`, "circle-radius", deadZoneradius)
+                const rangeRadius = this.meterToPixel(station.range * 1000, center.lat, map.getZoom());
+                map.setPaintProperty(`${station.name}-rangeZoneLayer`, "circle-radius", rangeRadius)
+            }
+        });
+        const canvas = map.getCanvasContainer();
+        map.on('mouseenter', station.name, function () {
+            canvas.style.cursor = 'move';
+        });
+        map.on('mouseleave', station.name, function () {
+            canvas.style.cursor = '';
+        });
+        const onMove = e => {
+            const coords = e.lngLat;
+            canvas.style.cursor = 'grabbing';
+            geoJson.features[0].geometry.coordinates = [coords.lng, coords.lat];
+            map.getSource(`${station.name}-deadZone`).setData(geoJson);
+            map.getSource(`${station.name}-point`).setData(geoJson);
+            map.getSource(`${station.name}-rangeZone`).setData(geoJson);
+        };
+        const onUp = e => {
+            const coords = e.lngLat;
+            map.off('mousemove', onMove);
+            map.off('touchmove', onMove);
+        };
+        map.on('mousedown', station.name, e => {
+            e.preventDefault();
+            canvas.style.cursor = 'grab';
+            map.on('mousemove', onMove);
+            map.once('mouseup', onUp);
+        });
+        map.on('touchstart', 'point', e => {
+            if (e.points.length !== 1) return;
+            e.preventDefault();
+            map.on('touchmove', onMove);
+            map.once('touchend', onUp);
+        });
+    };
 
     meterToPixel = (meters, latitude, zoomLevel) => {
         const earthCircumference = 40075017;
@@ -55,104 +156,18 @@ class AddMarkerWindow extends Component {
         });
 
         //радиус действия зоны
-        const radius = this.meterToPixel(station.range*1000, center.lat, map.getZoom());
-        map.addSource(`${station.name}-rangeZone`, {
-            "type": "geojson",
-            "data": geoJson
-        });
-        map.addLayer({
-            'id': `${station.name}-rangeZoneLayer`,
-            'type': 'circle',
-            'source': `${station.name}-rangeZone`,
-            "paint": {
-                "circle-radius": radius,
-                "circle-color": 'green',
-                "circle-opacity": 0.5,
-            }
-        });
+        this.addRangeZone(map, station, center, geoJson);
 
         //радиус мертвой зоны
-        const deadZoneradius = this.meterToPixel(station.blindSpot*1000, center.lat, map.getZoom());
-        map.addSource(`${station.name}-deadZone`, {
-            "type": "geojson",
-            "data": geoJson
-        });
-        map.addLayer({
-            'id': `${station.name}-deadZoneLayer`,
-            'type': 'circle',
-            'source': `${station.name}-deadZone`,
-            "paint": {
-                "circle-radius": deadZoneradius,
-                "circle-color": 'red',
-                "circle-opacity": 0.6,
-            }
-        });
-
+        this.addDeadZone(map, station, center, geoJson);
 
         //иконка + текст
-        map.addLayer({
-            id: station.name,
-            type: "symbol",
-            source: `${station.name}-point`,
-            "layout": {
-                "icon-image": "station",
-                "icon-size": 0.2,
-                "text-field": station.name,
-                "text-offset": [-0.5, 2],
-                "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-                "text-size": 15,
-                "text-transform": "uppercase",
-                "text-letter-spacing": 0.05,
-            },
-        });
+        this.addIconWithImage(map, station);
+
+        //установка слушателей
+        this.addEventListeners(map, station,center,geoJson);
 
         this.props.addStation(station);
-
-
-        map.on('click', station.name, e => {
-            this.onStationClickHandler(station);
-        });
-        map.on('zoom', e => {
-            if (map.getLayer(`${station.name}-deadZoneLayer`) && map.getLayer(`${station.name}-rangeZoneLayer`)) {
-                const deadZoneradius = this.meterToPixel(station.blindSpot * 1000, center.lat, map.getZoom());
-                map.setPaintProperty(`${station.name}-deadZoneLayer`, "circle-radius", deadZoneradius)
-                const rangeRadius = this.meterToPixel(station.range * 1000, center.lat, map.getZoom());
-                map.setPaintProperty(`${station.name}-rangeZoneLayer`, "circle-radius", rangeRadius)
-            }
-        });
-        const canvas = map.getCanvasContainer();
-        map.on('mouseenter', station.name, function () {
-            canvas.style.cursor = 'move';
-        });
-        map.on('mouseleave', station.name, function () {
-            canvas.style.cursor = '';
-        });
-
-        const onMove = e => {
-            const coords = e.lngLat;
-            canvas.style.cursor = 'grabbing';
-            geoJson.features[0].geometry.coordinates = [coords.lng, coords.lat]
-            map.getSource(`${station.name}-point`).setData(geoJson);
-            map.getSource(`${station.name}-deadZone`).setData(geoJson);
-            map.getSource(`${station.name}-rangeZone`).setData(geoJson);
-        };
-        const onUp = e => {
-            const coords = e.lngLat;
-            map.off('mousemove', onMove);
-            map.off('touchmove', onMove);
-        };
-        map.on('mousedown', station.name, e => {
-            e.preventDefault();
-            canvas.style.cursor = 'grab';
-            map.on('mousemove', onMove);
-            map.once('mouseup', onUp);
-        });
-        map.on('touchstart', 'point', e => {
-            if (e.points.length !== 1) return;
-            e.preventDefault();
-            map.on('touchmove', onMove);
-            map.once('touchend', onUp);
-        });
     };
     onStationClickHandler = (station) => {
         const map = this.props.map;
