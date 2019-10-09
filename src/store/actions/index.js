@@ -1,2 +1,2 @@
 export {addStation, addMap, removeStation} from './map/map';
-export {setTowns} from './enterData/enterData'
+export {setTowns, setStations} from './enterData/enterData'

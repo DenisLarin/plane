@@ -8,7 +8,6 @@ export const setStations = (stations) => {
     }
 };
 const addTown = (town) => {
-    console.log(town);
     return{
         type: enterDataActions.SET_TOWNS,
         town: town

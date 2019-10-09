@@ -10,13 +10,6 @@ import StationButton from "../../components/StationButton/StationButton";
 
 class AddMarkerWindow extends Component {
     state = {
-        stations: [
-            {name: "alpha", range: 400, blindSpot: 150, coast: 100},
-            {name: "romeo", range: 400, blindSpot: 200, coast: 80},
-            {name: "home", range: 200, blindSpot: 100, coast: 50},
-            {name: "grizzly", range: 150, blindSpot: 0, coast: 40},
-            {name: "new", range: 400, blindSpot: 150, coast: 0},
-        ],
         totalCoast: 0
     };
     //добавление мертвой зоны
@@ -134,7 +127,7 @@ class AddMarkerWindow extends Component {
             return
         }
 
-        const center = map.getCenter();
+        const center = map.centerBetweenTowns;
         if (map.listImages().filter(e => e === "station").length === 0) {
             map.loadImage(stationIMG, (error, image) => {
                 if (error) throw error;
@@ -147,7 +140,7 @@ class AddMarkerWindow extends Component {
                 "type": "Feature",
                 "geometry": {
                     "type": "Point",
-                    "coordinates": [center.lat, center.lng]
+                    "coordinates": [center.lng, center.lat]
                 }
             }]
         };
@@ -172,7 +165,7 @@ class AddMarkerWindow extends Component {
         this.setState(state=>{
             return {totalCoast: state.totalCoast+station.coast}
         });
-        console.log(this.state);
+
     };
     onStationClickHandler = (station) => {
         const map = this.props.map;
@@ -189,12 +182,11 @@ class AddMarkerWindow extends Component {
     };
 
     render() {
-        const {stations} = this.state;
         if (!this.props.map)
             return null;
         const selectedStations = this.props.stations;
         let buttons = null;
-        let avaliebleStations = stations;
+        let avaliebleStations = this.props.avaliebleStations;
         selectedStations.map(station => {
             avaliebleStations = avaliebleStations.filter((st) => {
                 return st.name !== station.name
@@ -229,7 +221,8 @@ const mapDispatchToProps = dispatch => {
 const mapStateToProps = state => {
     return {
         map: state.mapReducer.map,
-        stations: state.mapReducer.stations
+        stations: state.mapReducer.stations,
+        avaliebleStations: state.dataReducer.stations
     }
 };
 
