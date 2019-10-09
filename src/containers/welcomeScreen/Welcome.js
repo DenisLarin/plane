@@ -5,7 +5,6 @@ import {setTowns, setStations} from './../../store/actions/index'
 import './welcomeScreen.scss'
 import EnterTowns from "./enterTowns/EnterTowns";
 import EnterStations from "./enterStations/enterStations";
-import warning from "react-redux/lib/utils/warning";
 
 function mapStateToProps(state) {
     return {};
