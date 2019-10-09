@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl'
+import {} from 'react-mapbox-gl-geocoder'
 import {connect} from 'react-redux'
 import {addMap} from './../../store/actions/index'
 import './map.css'

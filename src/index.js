@@ -11,11 +11,13 @@ import {createStore, applyMiddleware, compose, combineReducers} from 'redux';
 import thunk from 'redux-thunk';
 
 import Map from './store/reducers/map/map'
+import EnterData from './store/reducers/enterData/enterData'
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const rootReducer = combineReducers({
-    mapReducer: Map
+    mapReducer: Map,
+    dataReducer: EnterData
 });
 const store = createStore(rootReducer, composeEnhancers(applyMiddleware(thunk)));
 

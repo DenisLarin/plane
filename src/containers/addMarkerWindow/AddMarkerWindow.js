@@ -15,8 +15,9 @@ class AddMarkerWindow extends Component {
             {name: "romeo", range: 400, blindSpot: 200, coast: 80},
             {name: "home", range: 200, blindSpot: 100, coast: 50},
             {name: "grizzly", range: 150, blindSpot: 0, coast: 40},
-            {name: "new", range: 400, blindSpot: 150, coast: NaN},
-        ]
+            {name: "new", range: 400, blindSpot: 150, coast: 0},
+        ],
+        totalCoast: 0
     };
     //добавление мертвой зоны
     addDeadZone = (map, station, center, geoJson) => {
@@ -168,6 +169,10 @@ class AddMarkerWindow extends Component {
         this.addEventListeners(map, station,center,geoJson);
 
         this.props.addStation(station);
+        this.setState(state=>{
+            return {totalCoast: state.totalCoast+station.coast}
+        });
+        console.log(this.state);
     };
     onStationClickHandler = (station) => {
         const map = this.props.map;
@@ -177,8 +182,10 @@ class AddMarkerWindow extends Component {
         map.removeLayer(`${station.name}-rangeZoneLayer`);
         map.removeSource(`${station.name}-deadZone`);
         map.removeSource(`${station.name}-rangeZone`);
-
         this.props.removeStation(station);
+        this.setState(state=>{
+           return {totalCoast: state.totalCoast-station.coast};
+        });
     };
 
     render() {
@@ -206,6 +213,7 @@ class AddMarkerWindow extends Component {
                 <div className="buttons">
                     {buttons}
                 </div>
+                <p>Current coast: {this.state.totalCoast}</p>
             </div>
         );
     }
