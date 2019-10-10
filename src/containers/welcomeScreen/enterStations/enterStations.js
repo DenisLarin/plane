@@ -2,7 +2,6 @@ import React from 'react';
 import InputField from "../../../components/inputs/InputField";
 import './enterStations.scss'
 
-
 function EnterStations(props) {
     const {inputs} = props
     const renderInputs = inputs.map(input => {

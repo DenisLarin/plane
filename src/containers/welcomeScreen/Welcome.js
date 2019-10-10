@@ -5,6 +5,7 @@ import {setTowns, setStations} from './../../store/actions/index'
 import './welcomeScreen.scss'
 import EnterTowns from "./enterTowns/EnterTowns";
 import EnterStations from "./enterStations/enterStations";
+import Container from "../../hoc/Container";
 
 function mapStateToProps(state) {
     return {};
@@ -179,24 +180,26 @@ class Welcome extends Component {
     render() {
         if (this.state.warning) {
             var warning = <><p style={{color: 'red'}}>{this.state.warning}</p>
-            <p>Stations:<br/></p>
-                <pre>{JSON.stringify(this.state.defaultStations,null,'\t')}</pre>
+                <p>Stations:<br/></p>
+                <pre>{JSON.stringify(this.state.defaultStations, null, '\t')}</pre>
                 <p>Towns:<br/></p>
-                <pre>{JSON.stringify(this.state.defaultsTowns,null,'\t')}</pre>
+                <pre>{JSON.stringify(this.state.defaultsTowns, null, '\t')}</pre>
             </>
         }
         return (
             <div className="welcomeScreen">
-                <h1>Welcome to Plane App</h1>
-                <h3>Enter Towns, before use the app</h3>
-                <EnterTowns inputs={this.state.town.inputs}
-                            onChange={(id, event) => this.onChangeTextInputHandler(id, event, "town")}/>
-                <h3>Enter Stations ("station name" "station range" "station blindSpot" "station coast") with <b
-                    style={{textDecoration: 'underline', color: "red"}}>space</b> between values</h3>
-                <EnterStations inputs={this.state.station.inputs}
-                               onChange={(id, event) => this.onChangeTextInputHandler(id, event, "station")}/>
-                <button onClick={this.saveValues}>Save Values</button>
-                {warning}
+                <Container className="container">
+                    <h1>Welcome to Plane App</h1>
+                    <h3>Enter Towns, before use the app</h3>
+                    <EnterTowns inputs={this.state.town.inputs}
+                                onChange={(id, event) => this.onChangeTextInputHandler(id, event, "town")}/>
+                    <h3>Enter Stations ("station name" "station range" "station blindSpot" "station coast") with <b
+                        style={{textDecoration: 'underline', color: "red"}}>space</b> between values</h3>
+                    <EnterStations inputs={this.state.station.inputs}
+                                   onChange={(id, event) => this.onChangeTextInputHandler(id, event, "station")}/>
+                    <button onClick={this.saveValues}>Save Values</button>
+                    {warning}
+                </Container>
             </div>
         );
     }

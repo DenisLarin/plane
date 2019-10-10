@@ -1,9 +1,30 @@
 .enterTown{
+  display: flex;
+
+  justify-content: center;
   input{
     margin-right: 10px;
     text-align: center;
+    padding: 10px;
+    min-width: 20px;
     &:last-child{
       margin-right: 0;
+    }
+  }
+}
+
+@media (max-width: 670px) {
+  .enterTown{
+    display: flex;
+    flex-direction: column;
+
+    input{
+      margin-right: 0;
+      width: 100%;
+      margin-bottom: 10px;
+      &:last-child{
+        margin-bottom: 0;
+      }
     }
   }
 }
