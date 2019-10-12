@@ -10,7 +10,7 @@ import StationButton from "../../components/StationButton/StationButton";
 
 class AddMarkerWindow extends Component {
     state = {
-        totalCoast: 0
+        totalCoast: 0,
     };
     //добавление мертвой зоны
     addDeadZone = (map, station, center, geoJson) => {
@@ -28,7 +28,7 @@ class AddMarkerWindow extends Component {
                 "circle-color": 'red',
                 "circle-opacity": 0.6,
             }
-        });
+        },station.name);
     };
     //добавление активной зоны
     addRangeZone = (map, station, center, geoJson) => {
@@ -46,7 +46,7 @@ class AddMarkerWindow extends Component {
                 "circle-color": 'green',
                 "circle-opacity": 0.5,
             }
-        });
+        },station.name);
     };
     //добавление иконки и надписи
     addIconWithImage = (map, station) => {
@@ -88,21 +88,37 @@ class AddMarkerWindow extends Component {
             canvas.style.cursor = '';
         });
         const onMove = e => {
+            if (station.point && (e.point.x === station.point.x && e.point.y === station.point.y)){
+                return;
+            }
+            console.log("move");
             const coords = e.lngLat;
             canvas.style.cursor = 'grabbing';
+            const stationName = station.name;
+            // const deadZone =  map.getSource(`${stationName}-deadZone`);
+            const point =  map.getSource(`${stationName}-point`);
+            // const range =  map.getSource(`${stationName}-rangeZone`);
             geoJson.features[0].geometry.coordinates = [coords.lng, coords.lat];
-            map.getSource(`${station.name}-deadZone`).setData(geoJson);
-            map.getSource(`${station.name}-point`).setData(geoJson);
-            map.getSource(`${station.name}-rangeZone`).setData(geoJson);
+            point.setData(geoJson);
         };
         const onUp = e => {
-            const coords = e.lngLat;
+            const newCenter = {lat: geoJson.features[0].geometry.coordinates[0],lng: geoJson.features[0].geometry.coordinates[1]}
+            this.addRangeZone(map, station, center, geoJson);
+            this.addDeadZone(map, station, center, geoJson)
+
+            console.log(geoJson);
             map.off('mousemove', onMove);
             map.off('touchmove', onMove);
         };
         map.on('mousedown', station.name, e => {
             e.preventDefault();
             canvas.style.cursor = 'grab';
+
+            map.removeLayer(`${station.name}-deadZoneLayer`);
+            map.removeLayer(`${station.name}-rangeZoneLayer`);
+            map.removeSource(`${station.name}-deadZone`);
+            map.removeSource(`${station.name}-rangeZone`);
+
             map.on('mousemove', onMove);
             map.once('mouseup', onUp);
         });
@@ -121,6 +137,9 @@ class AddMarkerWindow extends Component {
         return meters / meterPerPixel;
     };
 
+
+
+    //main
     addStationButtonClickHandler = (station) => {
         const map = this.props.map;
         if (!map) {
@@ -149,14 +168,16 @@ class AddMarkerWindow extends Component {
             "data": geoJson
         });
 
+        //иконка + текст
+        this.addIconWithImage(map, station);
+
         //радиус действия зоны
         this.addRangeZone(map, station, center, geoJson);
 
         //радиус мертвой зоны
         this.addDeadZone(map, station, center, geoJson);
 
-        //иконка + текст
-        this.addIconWithImage(map, station);
+
 
         //установка слушателей
         this.addEventListeners(map, station,center,geoJson);
