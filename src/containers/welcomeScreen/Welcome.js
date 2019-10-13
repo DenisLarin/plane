@@ -6,6 +6,7 @@ import './welcomeScreen.scss'
 import EnterTowns from "./enterTowns/EnterTowns";
 import EnterStations from "./enterStations/enterStations";
 import Container from "../../hoc/Container";
+import BetaApplicationModal from "../../components/betaApplicationModal/BetaApplicationModal";
 
 function mapStateToProps(state) {
     return {};
@@ -116,8 +117,14 @@ class Welcome extends Component {
             "Perm",
             "Kurgan"
         ],
-        isEditable: false
+        isModalShow: true,
     };
+
+
+    onModalCloseHandler = () => {
+        this.setState({isModalShow: false})
+    };
+
     saveValues = () => {
         if (this.state.warning) {
             this.props.addTowns(this.state.defaultsTowns);
@@ -126,10 +133,10 @@ class Welcome extends Component {
         }
         const towns = [];
         const stations = [];
-        let isError = false
+        let isError = false;
         this.state.town.inputs.map(town => {
             if (town.value === "") {
-                isError = true
+                isError = true;
                 this.setState(state => {
                     return {
                         ...state,
@@ -140,7 +147,7 @@ class Welcome extends Component {
             towns.push(town.value);
         });
         if (isError)
-            return null
+            return null;
         this.state.station.inputs.map(station => {
             const stationLine = station.value
             const split = stationLine.split(' ');
@@ -189,15 +196,18 @@ class Welcome extends Component {
         return (
             <div className="welcomeScreen">
                 <Container className="container">
-                    <h1>Welcome to Plane App</h1>
-                    <h3>Enter Towns, before use the app</h3>
-                    <EnterTowns inputs={this.state.town.inputs}
-                                onChange={(id, event) => this.onChangeTextInputHandler(id, event, "town")}/>
-                    <h3>Enter Stations ("station name" "station range" "station blindSpot" "station coast") with <b
-                        style={{textDecoration: 'underline', color: "red"}}>space</b> between values</h3>
-                    <EnterStations inputs={this.state.station.inputs}
-                                   onChange={(id, event) => this.onChangeTextInputHandler(id, event, "station")}/>
-                    <button onClick={this.saveValues}>Save Values</button>
+                    <BetaApplicationModal onReadModal={this.onModalCloseHandler} isShow={this.state.isModalShow}/>
+                    <div>
+                        <h1>Welcome to Plane App</h1>
+                        <h3>Enter Towns, before use the app</h3>
+                        <EnterTowns inputs={this.state.town.inputs}
+                                    onChange={(id, event) => this.onChangeTextInputHandler(id, event, "town")}/>
+                        <h3>Enter Stations ("station name" "station range" "station blindSpot" "station coast") with <b
+                            style={{textDecoration: 'underline', color: "red"}}>space</b> between values</h3>
+                        <EnterStations inputs={this.state.station.inputs}
+                                       onChange={(id, event) => this.onChangeTextInputHandler(id, event, "station")}/>
+                        <button onClick={this.saveValues}>Save Values</button>
+                    </div>
                     {warning}
                 </Container>
             </div>
