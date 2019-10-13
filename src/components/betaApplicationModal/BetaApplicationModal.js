@@ -1,9 +1,10 @@
 import React from 'react';
 import './betaApplicationModal.scss'
+
 function BetaApplicationModal(props) {
     let className = "betaApplicationModal";
-    if (props.isShow){
-       className = "betaApplicationModal show"
+    if (props.isShow) {
+        className = "betaApplicationModal show"
     }
     return (
         <div className={className}>
