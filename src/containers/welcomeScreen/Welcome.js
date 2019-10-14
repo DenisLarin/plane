@@ -8,6 +8,7 @@ import EnterStations from "./enterStations/enterStations";
 import Container from "../../hoc/Container";
 import BetaApplicationModal from "../../components/betaApplicationModal/BetaApplicationModal";
 
+
 function mapStateToProps(state) {
     return {};
 }
