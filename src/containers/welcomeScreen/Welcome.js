@@ -119,15 +119,23 @@ class Welcome extends Component {
             "Kurgan"
         ],
         isModalShow: true,
+
+        loadDefault: true
     };
+
+    componentDidMount() {
+        this.saveValues();
+    }
+    
 
 
     onModalCloseHandler = () => {
         this.setState({isModalShow: false})
     };
 
+    //TODO убрать второе условие!!!
     saveValues = () => {
-        if (this.state.warning) {
+        if (this.state.warning || this.state.loadDefault) {
             this.props.addTowns(this.state.defaultsTowns);
             this.props.addStations(this.state.defaultStations);
             return <Redirect to="/map"/>

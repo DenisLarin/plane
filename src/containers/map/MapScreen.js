@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl'
 import {connect} from 'react-redux'
-import {addMap} from './../../store/actions/index'
 import './map.css'
 import './mapExtensions.css'
+import MAP from './MAPVALUES'
 
 class MapScreen extends Component {
     componentDidMount() {
@@ -44,7 +44,7 @@ class MapScreen extends Component {
         const mapCenterY = (maxY+minY)/2;
         map.setCenter([mapCenterX,mapCenterY]);
         map.centerBetweenTowns = map.getCenter();
-        this.props.addMap(map)
+        MAP.setMap(map);
     }
 
     render() {
@@ -57,18 +57,13 @@ class MapScreen extends Component {
         );
     }
 }
-const mapDispatchToProps = dispatch =>{
-    return{
-        addMap: (map)=>dispatch(addMap(map))
-    }
-};
 const mapStateToProps = state =>{
     return{
         towns: state.dataReducer.towns
     }
 };
 
-export default connect(mapStateToProps,mapDispatchToProps)(MapScreen);
+export default connect(mapStateToProps,null)(MapScreen);
 
 
 

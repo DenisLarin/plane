@@ -13,9 +13,9 @@ export const removeStation = (station)=>{
         station: station
     }
 };
-export const addMap = (map)=>{
+export const setStationData = (data)=>{
     return{
-        type: mapActions.SAVE_MAP,
-        map: map
+        type: mapActions.ADD_STATION_DATA,
+        data: data
     }
-};
+}

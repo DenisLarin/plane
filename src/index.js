@@ -12,12 +12,14 @@ import thunk from 'redux-thunk';
 
 import Map from './store/reducers/map/map'
 import EnterData from './store/reducers/enterData/enterData'
+import TaskData from './store/reducers/task/task'
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const rootReducer = combineReducers({
     mapReducer: Map,
-    dataReducer: EnterData
+    dataReducer: EnterData,
+    tasksReducer: TaskData,
 });
 const store = createStore(rootReducer, composeEnhancers(applyMiddleware(thunk)));
 
