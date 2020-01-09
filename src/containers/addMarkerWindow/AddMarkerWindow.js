@@ -291,7 +291,6 @@ class AddMarkerWindow extends Component {
                     const totalDx = Math.abs(firstDx + secondDx);
                     const totalDy = Math.abs(firstDy + secondDy);
 
-
                     console.group("координаты");
                     console.log("totalX",totalX);
                     console.log("totalY",totalY);
