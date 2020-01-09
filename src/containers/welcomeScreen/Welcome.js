@@ -120,11 +120,11 @@ class Welcome extends Component {
         ],
         isModalShow: true,
 
-        loadDefault: true
+        loadDefault: false
     };
 
     componentDidMount() {
-        this.saveValues();
+        // this.saveValues();
     }
     
 
@@ -135,6 +135,7 @@ class Welcome extends Component {
 
     //TODO убрать второе условие!!!
     saveValues = () => {
+        console.log('save value');
         if (this.state.warning || this.state.loadDefault) {
             this.props.addTowns(this.state.defaultsTowns);
             this.props.addStations(this.state.defaultStations);
@@ -157,6 +158,7 @@ class Welcome extends Component {
         });
         if (isError)
             return null;
+
         this.state.station.inputs.map(station => {
             const stationLine = station.value
             const split = stationLine.split(' ');
@@ -168,8 +170,7 @@ class Welcome extends Component {
                         warning: "You haven't entered value. If you want use default value press button again"
                     }
                 });
-            }
-            ;
+            };
             const currentStation = {name: split[0], range: split[1], blindSpot: split[2], coast: Number(split[3])}
             stations.push(currentStation);
         });
